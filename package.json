@@ -37,6 +37,8 @@
     "zxcvbn": "^4.4"
   },
   "scripts": {
-    "build": "grunt build"
+    "build": "grunt build",
+    "build-css": "node-sass --include-path assets/invoiceplane/sass assets/invoiceplane/sass/main.scss assets/invoiceplane/css/main.css",
+    "watch-css": "node-sass --include-path assets/invoiceplane/sass assets/invoiceplane/sass/main.scss assets/invoiceplane/css/main.css --watch"
   }
 }
