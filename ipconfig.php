@@ -18,11 +18,11 @@ DISABLE_SETUP=false
 REMOVE_INDEXPHP=false
 
 # These database settings are set during the initial setup
-DB_HOSTNAME=
-DB_USERNAME=
-DB_PASSWORD=
-DB_DATABASE=
-DB_PORT=
+DB_HOSTNAME='172.25.0.13'
+DB_USERNAME='ipdevdb'
+DB_PASSWORD='ipdevdb'
+DB_DATABASE='invoiceplane_db'
+DB_PORT=3306
 
 # If you want to be logged out after closing your browser window, set this setting to 0 (ZERO).
 # The number represents the amount of minutes after that IP will automatically log out users,
