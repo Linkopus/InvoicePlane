@@ -1,114 +1,58 @@
-version: "3"
+name: Deploy to Development Environment
 
-networks:
-  invoiceplane:
-    driver: bridge
-    ipam:
-      driver: default
-      config:
-        - subnet: 172.25.0.0/17
+on:
+  push:
+    branches:
+      - development
 
-volumes:
-  invoiceplane-db:
-    driver: "local"
-  nginx_logs:
-    driver: "local"
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: Dev
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-services:
-  php:
-    container_name: "invoiceplane-php"
-    build:
-      context: ./resources/docker/php-fpm
-      args:
-        - PUID=1000
-        - PGID=1000
-        - TZ=UTC
-    links:
-      - db
-    expose:
-      - "9000"
-    dns: 8.8.8.8
-    depends_on:
-      - db
-    networks:
-      invoiceplane:
-        ipv4_address: 172.25.0.11
-    volumes:
-      - /home/mohammed/InvoicePlane:/var/www/projects/invoiceplane:delegated
-      - ./resources/docker/php-fpm/php-dev.ini:/usr/local/etc/php/php.ini
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
 
-  nginx:
-    container_name: "invoiceplane-nginx"
-    build:
-      context: ./resources/docker/nginx
-    links:
-      - php
-    ports:
-      - "80:80"
-    dns: 8.8.8.8
-    depends_on:
-      - php
-    networks:
-      invoiceplane:
-        ipv4_address: 172.25.0.12
-    volumes:
-      - /home/mohammed/InvoicePlane:/var/www/projects/invoiceplane:delegated
-      - nginx_logs:/var/log/nginx
-      - ./resources/docker/nginx/invoiceplane.conf:/etc/nginx/conf.d/invoiceplane.conf:ro
-      - ./resources/docker/nginx/sites-available:/etc/nginx/sites-available:ro
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-  db:
-    container_name: "invoiceplane-db"
-    build:
-      context: ./resources/docker/mariadb
-    environment:
-      - MARIADB_ROOT_PASSWORD=ipdevdb
-      - MARIADB_USER=ipdevdb
-      - MARIADB_PASSWORD=ipdevdb
-      - MARIADB_DATABASE=invoiceplane_db
-    ports:
-      - "3306:3306"
-    networks:
-      invoiceplane:
-        ipv4_address: 172.25.0.13
-    volumes:
-      - "invoiceplane-db:/var/lib/mysql"
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: linkopus/invoiceplane:latest
 
-  phpmyadmin:
-    container_name: "invoiceplane-dbadmin"
-    build:
-      context: ./resources/docker/phpmyadmin
-    environment:
-      - PMA_HOST=invoiceplane-db
-      - MYSQL_DATABASE=invoiceplane_db
-      - MYSQL_USER=ipdevdb
-      - MYSQL_PASSWORD=ipdevdb
-      - MYSQL_ROOT_PASSWORD=ipdevdb
-      - MAX_EXECUTION_TIME=600
-      - MEMORY_LIMIT=256M
-      - UPLOAD_LIMIT=2G
-    depends_on:
-      - db
-    links:
-      - db
-    restart: always
-    volumes:
-      - ./resources/docker/phpmyadmin/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php
-      - ./resources/docker/databases:/var/www/html/tmp/upload_databases
-    ports:
-      - "8081:80"
-    networks:
-      invoiceplane:
-        ipv4_address: 172.25.0.16
+      - name: Deploy to Dev Environment
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEV_HOST }}
+          username: ${{ secrets.DEV_USER }}
+          password: ${{ secrets.DEV_PASSWORD }}
+          script: |
+            echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+            # Naviguer dans le répertoire du projet
+            cd /home/mohammed/InvoicePlane
+            if [ -d ".git" ]; then
+              git reset --hard
+              git clean -fd
+              git fetch origin
+              git checkout development
+              git pull origin development
+            else
+              echo "Error: /home/mohammed/InvoicePlane is not a git repository."
+              exit 1
+            fi
 
- # --- App service using pre-built image
-  app:
-    image: linkopus/invoiceplane:latest
-    container_name: "invoiceplane-app"
-    ports:
-      - "8080:80"
-    volumes:
-      - /home/mohammed/InvoicePlane:/var/www/html
-    networks:
-      invoiceplane:
-        ipv4_address: 172.25.0.17
+            # Utiliser Docker Compose pour recréer les conteneurs
+            docker-compose down
+            docker-compose up -d
+
+            docker logout
