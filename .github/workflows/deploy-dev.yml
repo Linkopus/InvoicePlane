@@ -29,9 +29,6 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: linkopus/invoiceplane:latest
-          build-args: |
-            NGINX_CERTIFICATE=${{ secrets.NGINX_CERTIFICATE }}
-            NGINX_PRIVATE_KEY=${{ secrets.NGINX_PRIVATE_KEY }}
 
       - name: Deploy to Dev Environment
         uses: appleboy/ssh-action@master
@@ -42,13 +39,20 @@ jobs:
           script: |
             echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
             docker pull linkopus/invoiceplane:latest
-            docker stop invoiceplane || true
-            docker rm invoiceplane || true
-            docker run -d --name invoiceplane \
+            if [ "$(docker ps -aq -f name=invoiceplane-app)" ]; then
+              docker stop invoiceplane-app
+              docker rm invoiceplane-app
+            fi
+            docker run -d --name invoiceplane-app \
               -p ${{ secrets.NGINX_HTTPS_PORT }}:${{ secrets.NGINX_HTTPS_PORT }} \
               -p ${{ secrets.NGINX_HTTP_PORT }}:${{ secrets.NGINX_HTTP_PORT }} \
               -v /home/mohammed/InvoicePlane:/var/www/html \
               linkopus/invoiceplane:latest
             docker logout
             # Exécuter le script de mise à jour du projet
-            ./update_project.sh
+            cd /home/mohammed/InvoicePlane
+            git reset --hard
+            git clean -fd
+            git fetch origin
+            git checkout development
+            git pull origin development
