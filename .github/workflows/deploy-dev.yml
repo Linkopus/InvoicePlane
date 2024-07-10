@@ -48,7 +48,6 @@ jobs:
             docker rm invoiceplane-php
             echo "Running new container"
             docker run -d --name invoiceplane-php \
-              -p ${{ secrets.NGINX_HTTPS_PORT }}:${{ secrets.NGINX_HTTPS_PORT }} \
-              -p ${{ secrets.NGINX_HTTP_PORT }}:${{ secrets.NGINX_HTTP_PORT }} \
+              -p 9000:80 \
               linkopus/invoiceplane:latest
             docker logout

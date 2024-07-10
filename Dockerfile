@@ -60,5 +60,5 @@ RUN chmod -R 775 $APP_ROOT/ipconfig.php \
     && chown -R www-data:www-data $APP_ROOT
 
 # Exposer les ports nécessaires
-EXPOSE 80
+EXPOSE 9000
 
