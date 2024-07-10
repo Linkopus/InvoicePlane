@@ -1,69 +1,38 @@
-name: Deploy to Development Environment
-
-on:
-  push:
-    branches:
-      - development
-
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-    environment: Dev
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: linkopus/invoiceplane:latest
-          build-args: |
-            NGINX_CERTIFICATE=${{ secrets.NGINX_CERTIFICATE }}
-            NGINX_PRIVATE_KEY=${{ secrets.NGINX_PRIVATE_KEY }}
-
-      - name: Deploy to Dev Environment
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.DEV_HOST }}
-          username: ${{ secrets.DEV_USER }}
-          password: ${{ secrets.DEV_PASSWORD }}
-          script: |
-            echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-            docker pull linkopus/invoiceplane:latest
-            docker stop invoiceplane || true
-            docker rm invoiceplane || true
-            docker run -d --name invoiceplane \
-              -p ${{ secrets.NGINX_HTTPS_PORT }}:${{ secrets.NGINX_HTTPS_PORT }} \
-              -p ${{ secrets.NGINX_HTTP_PORT }}:${{ secrets.NGINX_HTTP_PORT }} \
-              -v /home/mohammed/InvoicePlane:/var/www/html \
-              linkopus/invoiceplane:latest
-            docker logout
-            # Vérifier que le répertoire existe
-            if [ -d "/home/mohammed/InvoicePlane" ]; then
-              cd /home/mohammed/InvoicePlane
-              if [ -d ".git" ]; then
-                git reset --hard
-                git clean -fd
-                git fetch origin
-                git checkout development
-                git pull origin development
-              else
-                echo "Error: /home/mohammed/InvoicePlane is not a git repository."
-                exit 1
-              fi
-            else
-              echo "Error: /home/mohammed/InvoicePlane does not exist."
-              exit 1
-            fi
+- name: Deploy to Dev Environment
+  uses: appleboy/ssh-action@master
+  with:
+    host: ${{ secrets.DEV_HOST }}
+    username: ${{ secrets.DEV_USER }}
+    password: ${{ secrets.DEV_PASSWORD }}
+    script: |
+      echo "Logging in to Docker Hub"
+      echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+      docker pull linkopus/invoiceplane:latest
+      echo "Stopping and removing existing container if exists"
+      if [ "$(docker ps -aq -f name=invoiceplane)" ]; then
+        docker stop invoiceplane
+        docker rm invoiceplane
+      fi
+      echo "Running new container"
+      docker run -d --name invoiceplane \
+        -p ${{ secrets.NGINX_HTTPS_PORT }}:${{ secrets.NGINX_HTTPS_PORT }} \
+        -p ${{ secrets.NGINX_HTTP_PORT }}:${{ secrets.NGINX_HTTP_PORT }} \
+        -v /home/mohammed/InvoicePlane:/var/www/html \
+        linkopus/invoiceplane:latest
+      docker logout
+      echo "Checking if the directory exists"
+      if [ -d "/home/mohammed/InvoicePlane" ]; then
+        cd /home/mohammed/InvoicePlane
+        if [ -d ".git" ]; then
+          git reset --hard
+          git clean -fd
+          git fetch origin
+          git checkout development
+          git pull origin development
+        else
+          echo "Error: /home/mohammed/InvoicePlane is not a git repository."
+          exit 1
+        fi
+      else
+        echo "Error: /home/mohammed/InvoicePlane does not exist."
+        exit 1
