@@ -18,7 +18,6 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 
 COPY ./nginx/nginx.conf /etc/nginx/nginx.conf
 COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
-COPY ./supervisord.conf /etc/supervisord.conf
 
 COPY . $APP_ROOT
 
