@@ -48,6 +48,3 @@ RUN yarn install
 # Exécuter Grunt pour construire les fichiers statiques
 RUN yarn global add grunt-cli
 RUN grunt
-
-# Changer le propriétaire des fichiers de l'application
-RUN ch
