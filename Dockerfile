@@ -12,7 +12,11 @@ RUN apk update && apk add --no-cache \
     libzip-dev \
     unzip \
     tzdata \
-    && docker-php-ext-install pdo pdo_mysql zip
+    freetype-dev \
+    libjpeg-turbo-dev \
+    libpng-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) gd bcmath pdo pdo_mysql zip
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
