@@ -46,4 +46,4 @@ ENCRYPTION_KEY=
 ENCRYPTION_CIPHER=AES-256
 
 # Set to true after the initial setup
-SETUP_COMPLETED=false
+SETUP_COMPLETED=true
