@@ -50,3 +50,5 @@ jobs:
               -v /home/mohammed/InvoicePlane:/var/www/html \
               linkopus/invoiceplane:latest
             docker logout
+            # Exécuter le script de mise à jour du projet
+            ./update_project.sh
