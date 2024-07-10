@@ -16,8 +16,8 @@ RUN apk update && apk add --no-cache \
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-COPY ./resources/nginx/nginx.conf /etc/nginx/nginx.conf
-COPY ./resources/nginx/invoiceplane.conf /etc/nginx/conf.d/default.conf
+COPY ./resources/docker/nginx/nginx.conf /etc/nginx/nginx.conf
+COPY ./resources/docker/nginx/invoiceplane.conf /etc/nginx/conf.d/default.conf
 
 COPY . $APP_ROOT
 
