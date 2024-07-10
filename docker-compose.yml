@@ -38,21 +38,31 @@ jobs:
           password: ${{ secrets.DEV_PASSWORD }}
           script: |
             echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-            # Naviguer dans le répertoire du projet
-            cd /home/mohammed/InvoicePlane
-            if [ -d ".git" ]; then
-              git reset --hard
-              git clean -fd
-              git fetch origin
-              git checkout development
-              git pull origin development
+            docker pull linkopus/invoiceplane:latest
+            if [ "$(docker ps -aq -f name=invoiceplane)" ]; then
+              docker stop invoiceplane
+              docker rm invoiceplane
+            fi
+            docker run -d --name invoiceplane \
+              -p ${{ secrets.NGINX_HTTPS_PORT }}:${{ secrets.NGINX_HTTPS_PORT }} \
+              -p ${{ secrets.NGINX_HTTP_PORT }}:${{ secrets.NGINX_HTTP_PORT }} \
+              -v /home/mohammed/InvoicePlane:/var/www/html \
+              linkopus/invoiceplane:latest
+            docker logout
+            # Vérifier que le répertoire existe
+            if [ -d "/home/mohammed/InvoicePlane" ]; then
+              cd /home/mohammed/InvoicePlane
+              if [ -d ".git" ]; then
+                git reset --hard
+                git clean -fd
+                git fetch origin
+                git checkout development
+                git pull origin development
+              else
+                echo "Error: /home/mohammed/InvoicePlane is not a git repository."
+                exit 1
+              fi
             else
-              echo "Error: /home/mohammed/InvoicePlane is not a git repository."
+              echo "Error: /home/mohammed/InvoicePlane does not exist."
               exit 1
             fi
-
-            # Utiliser Docker Compose pour recréer les conteneurs
-            docker-compose down
-            docker-compose up -d
-
-            docker logout
