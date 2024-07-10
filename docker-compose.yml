@@ -13,47 +13,55 @@ volumes:
     driver: "local"
   nginx_logs:
     driver: "local"
-  invoiceplane-app:
-    driver: "local"
 
 services:
   php:
     container_name: "invoiceplane-php"
-    image: linkopus/invoiceplane-php:latest  # Utilise l'image Docker Hub
+    image: linkopus/invoiceplane-php:latest
+    build:
+      context: ./resources/docker/php-fpm
+      args:
+        - PUID=1000
+        - PGID=1000
+        - TZ=UTC
+    links:
+      - db
     expose:
       - "9000"
-    dns:
-      - 8.8.8.8
+    dns: 8.8.8.8
     depends_on:
       - db
     networks:
       invoiceplane:
         ipv4_address: 172.25.0.11
     volumes:
-      - invoiceplane-app:/var/www/projects/invoiceplane  # Volume Docker
+      - linkopus/invoiceplane-php:/var/www/projects/invoiceplane:delegated
       - ./resources/docker/php-fpm/php-dev.ini:/usr/local/etc/php/php.ini
 
   nginx:
     container_name: "invoiceplane-nginx"
-    image: linkopus/invoiceplane-nginx:latest  # Utilise l'image Docker Hub
+    build:
+      context: ./resources/docker/nginx
+    links:
+      - php
     ports:
       - "80:80"
-    dns:
-      - 8.8.8.8
+    dns: 8.8.8.8
     depends_on:
       - php
     networks:
       invoiceplane:
         ipv4_address: 172.25.0.12
     volumes:
-      - invoiceplane-app:/var/www/projects/invoiceplane  # Volume Docker
+      - linkopus/invoiceplane-php:/var/www/projects/invoiceplane:delegated
       - nginx_logs:/var/log/nginx
       - ./resources/docker/nginx/invoiceplane.conf:/etc/nginx/conf.d/invoiceplane.conf:ro
       - ./resources/docker/nginx/sites-available:/etc/nginx/sites-available:ro
 
   db:
     container_name: "invoiceplane-db"
-    image: linkopus/invoiceplane-db:latest  # Utilise l'image Docker Hub
+    build:
+      context: ./resources/docker/mariadb
     environment:
       - MARIADB_ROOT_PASSWORD=ipdevdb
       - MARIADB_USER=ipdevdb
@@ -65,11 +73,12 @@ services:
       invoiceplane:
         ipv4_address: 172.25.0.13
     volumes:
-      - invoiceplane-db:/var/lib/mysql
+      - "invoiceplane-db:/var/lib/mysql"
 
   phpmyadmin:
     container_name: "invoiceplane-dbadmin"
-    image: phpmyadmin/phpmyadmin:latest  # Utilise l'image officielle PHPMyAdmin de Docker Hub
+    build:
+      context: ./resources/docker/phpmyadmin
     environment:
       - PMA_HOST=invoiceplane-db
       - MYSQL_DATABASE=invoiceplane_db
