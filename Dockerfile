@@ -28,5 +28,3 @@ RUN composer install --no-dev --optimize-autoloader
 RUN chown -R www-data:www-data $APP_ROOT
 
 EXPOSE 80
-
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
