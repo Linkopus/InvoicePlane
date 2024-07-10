@@ -17,15 +17,12 @@ volumes:
 services:
   php:
     container_name: "invoiceplane-php"
-    image: linkopus/invoiceplane-php:latest
     build:
       context: ./resources/docker/php-fpm
       args:
         - PUID=1000
         - PGID=1000
         - TZ=UTC
-    links:
-      - db
     expose:
       - "9000"
     dns: 8.8.8.8
@@ -35,15 +32,12 @@ services:
       invoiceplane:
         ipv4_address: 172.25.0.11
     volumes:
-      - linkopus/invoiceplane-php:/var/www/projects/invoiceplane:delegated
-      - ./resources/docker/php-fpm/php-dev.ini:/usr/local/etc/php/php.ini
+      - nginx_logs:/var/log/nginx
 
   nginx:
     container_name: "invoiceplane-nginx"
     build:
       context: ./resources/docker/nginx
-    links:
-      - php
     ports:
       - "80:80"
     dns: 8.8.8.8
@@ -53,10 +47,7 @@ services:
       invoiceplane:
         ipv4_address: 172.25.0.12
     volumes:
-      - linkopus/invoiceplane-php:/var/www/projects/invoiceplane:delegated
       - nginx_logs:/var/log/nginx
-      - ./resources/docker/nginx/invoiceplane.conf:/etc/nginx/conf.d/invoiceplane.conf:ro
-      - ./resources/docker/nginx/sites-available:/etc/nginx/sites-available:ro
 
   db:
     container_name: "invoiceplane-db"
@@ -89,8 +80,6 @@ services:
       - MEMORY_LIMIT=256M
       - UPLOAD_LIMIT=2G
     depends_on:
-      - db
-    links:
       - db
     restart: always
     volumes:
