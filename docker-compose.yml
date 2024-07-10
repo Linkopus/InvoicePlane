@@ -100,3 +100,15 @@ services:
     networks:
       invoiceplane:
         ipv4_address: 172.25.0.16
+
+ # --- App service using pre-built image
+  app:
+    image: linkopus/invoiceplane:latest
+    container_name: "invoiceplane-app"
+    ports:
+      - "8080:80"
+    volumes:
+      - /home/mohammed/InvoicePlane:/var/www/html
+    networks:
+      invoiceplane:
+        ipv4_address: 172.25.0.17
