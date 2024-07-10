@@ -51,12 +51,12 @@ RUN grunt
 
 # Changer les permissions des répertoires nécessaires
 RUN chmod -R 775 $APP_ROOT/ipconfig.php \
-    && chmod -R 775 $APP_ROOT/uploads/ \
-    && chmod -R 775 $APP_ROOT/uploads/archive/ \
-    && chmod -R 775 $APP_ROOT/uploads/customer_files/ \
-    && chmod -R 775 $APP_ROOT/uploads/temp/ \
-    && chmod -R 775 $APP_ROOT/uploads/temp/mpdf/ \
-    && chmod -R 775 $APP_ROOT/application/logs/ \
+    && chmod -R 777 $APP_ROOT/uploads \
+    && chmod -R 777 $APP_ROOT/uploads/archive/ \
+    && chmod -R 777 $APP_ROOT/uploads/customer_files/ \
+    && chmod -R 777 $APP_ROOT/uploads/temp/ \
+    && chmod -R 777 $APP_ROOT/uploads/temp/mpdf/ \
+    && chmod -R 777 $APP_ROOT/application/logs/ \
     && chown -R www-data:www-data $APP_ROOT
 
 # Exposer les ports nécessaires

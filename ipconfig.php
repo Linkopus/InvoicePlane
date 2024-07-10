@@ -42,7 +42,7 @@ DISABLE_READ_ONLY=false
 ##
 
 # This key is automatically set after the first setup. Do not change it manually!
-ENCRYPTION_KEY=
+ENCRYPTION_KEY=base64:gGMVMkLWC4f7q/Kfa48hOwvlVdIKa4FLHnQLuciGAJg=
 ENCRYPTION_CIPHER=AES-256
 
 # Set to true after the initial setup
