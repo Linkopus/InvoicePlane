@@ -48,6 +48,5 @@ jobs:
             docker rm invoiceplane-php
             echo "Running new container"
             docker run -d --name invoiceplane-php \
-              -p 9000:80 \
               linkopus/invoiceplane:latest
             docker logout
