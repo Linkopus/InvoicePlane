@@ -50,7 +50,7 @@ jobs:
             fi
             echo "Running new container"
             docker run -d --name invoiceplane-php \
-              --network invoiceplane \
+              --network invoiceplane_invoiceplane \
               -p 9000:9000 \
               linkopus/invoiceplane:latest
             docker logout
