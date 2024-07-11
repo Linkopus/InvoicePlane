@@ -61,4 +61,4 @@ RUN chmod -R 775 $APP_ROOT/ipconfig.php \
 
 # Exposer les ports nécessaires
 EXPOSE 9000
-
+CMD ["php-fpm"]
