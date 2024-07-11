@@ -50,5 +50,5 @@ jobs:
             docker run -d --name invoiceplane-php \
               --ip 172.25.0.11 \
               -p 9000:9000 \
-              linkopus/invoiceplane-php:latest
+              linkopus/invoiceplane:latest
             docker logout
