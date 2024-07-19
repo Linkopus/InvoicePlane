@@ -50,7 +50,7 @@ services:
     volumes:
       - nginx_logs:/var/log/nginx
       - .:/var/www/projects/invoiceplane:delegated
-      - ./resources/docker/nginx/invoiceplane.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./resources/docker/nginx/invoiceplane.conf:/etc/nginx/conf.d/default.conf
 
   db:
     container_name: "invoiceplane-db"
