@@ -65,6 +65,9 @@ COPY ./xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 COPY ./fpm.conf /usr/local/etc/php-fpm.d/
 COPY ./php-dev.ini /usr/local/etc/php/conf.d/
 
+# Modify the listen directive to listen on all interfaces
+RUN sed -i 's/listen = 127.0.0.1:9000/listen = 0.0.0.0:9000/' /usr/local/etc/php-fpm.d/www.conf
+
 USER root
 
 # Cleanup all downloaded packages
