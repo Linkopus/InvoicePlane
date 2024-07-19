@@ -24,7 +24,7 @@ services:
         - PGID=1000
         - TZ=UTC
     expose:
-      - "9000:9000"
+      - "9000"  # Correct format for exposing port 9000
     dns: 8.8.8.8
     depends_on:
       - db
