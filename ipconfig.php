@@ -1,5 +1,5 @@
 # <?php exit('No direct script access allowed'); ?>
-# InvoicePlane Configuration File
+# InvoicePlane Configuration File 
 
 ### START HERE
 # Set your URL without trailing slash here, e.g. http://your-domain.com
