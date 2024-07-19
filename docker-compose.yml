@@ -33,6 +33,7 @@ services:
         ipv4_address: 172.25.0.11
     volumes:
       - nginx_logs:/var/log/nginx
+      - ./resources/docker/php-fpm/php-dev.ini:/usr/local/etc/php/php.ini
 
   nginx:
     container_name: "invoiceplane-nginx"
@@ -48,6 +49,8 @@ services:
         ipv4_address: 172.25.0.12
     volumes:
       - nginx_logs:/var/log/nginx
+      - .:/var/www/projects/invoiceplane:delegated
+      - ./resources/docker/nginx/invoiceplane.conf:/etc/nginx/conf.d/invoiceplane.conf:ro
 
   db:
     container_name: "invoiceplane-db"
