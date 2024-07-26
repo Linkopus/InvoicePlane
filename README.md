@@ -10,7 +10,7 @@
 </p>
 
 <p align="center" bgcolor="#429ae1"><i>InvoicePlane is a self-hosted open source application for managing your invoices, clients and payments.<br>
-  For more information visit <a href="https://www.invoiceplane.com">InvoicePlane.com</a> or try the <a href="https://www.invoiceplane.com/demo">Demo</a>..</i></p>
+  For more information visit <a href="https://www.invoiceplane.com">InvoicePlane.com</a> or try the <a href="https://www.invoiceplane.com/demo">Demo</a>...</i></p>
 
 ---
 
